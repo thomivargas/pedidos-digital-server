@@ -17,6 +17,7 @@ export type AdminVendedoresQuery = z.infer<typeof adminVendedoresQuerySchema>;
 
 export const crearUsuarioSchema = z.object({
   nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  usuario: z.string().min(2, 'El usuario debe tener al menos 2 caracteres'),
   correo: z.string().email('Correo inválido'),
   contrasena: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
   rol: Rol.default('VENDEDOR'),
