@@ -139,7 +139,7 @@ export async function crearUsuario(dto: CrearUsuarioDto) {
   const contrasena = await hashPassword(dto.contrasena);
 
   const usuario = await prisma.usuario.create({
-    data: { nombre: dto.nombre, correo: dto.correo, contrasena, rol: dto.rol },
+    data: { nombre: dto.nombre, usuario: dto.usuario, correo: dto.correo, contrasena, rol: dto.rol },
     select: { id: true, nombre: true, correo: true, rol: true, creadoEn: true },
   });
 
