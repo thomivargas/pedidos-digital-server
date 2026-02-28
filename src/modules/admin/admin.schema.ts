@@ -31,7 +31,30 @@ export const asignarVendedoresSchema = z.object({
   vendedorIds: z.array(z.string()),
 });
 
+export const crearPermutaAdminSchema = z.object({
+  nombre: z.string().min(1, 'Nombre requerido'),
+  modelo: z.string().min(1, 'Modelo requerido'),
+  bateriaMin: z.number().int().min(0).max(100),
+  bateriaMax: z.number().int().min(0).max(100),
+  precioUsd: z.number().positive('El precio debe ser mayor a 0'),
+});
+
+export const editarPermutaAdminSchema = crearPermutaAdminSchema.partial();
+
+export const crearPlanPagoAdminSchema = z.object({
+  marca: z.string().min(1, 'Marca requerida'),
+  cuotas: z.number().int().positive('Las cuotas deben ser mayor a 0'),
+  interesPct: z.number().min(0, 'El interés no puede ser negativo'),
+  ivaPct: z.number().min(0, 'El IVA no puede ser negativo'),
+});
+
+export const editarPlanPagoAdminSchema = crearPlanPagoAdminSchema.partial();
+
 export type AdminPedidosQuery = z.infer<typeof adminPedidosQuerySchema>;
 export type CrearUsuarioDto = z.infer<typeof crearUsuarioSchema>;
 export type CrearSucursalDto = z.infer<typeof crearSucursalSchema>;
 export type AsignarVendedoresDto = z.infer<typeof asignarVendedoresSchema>;
+export type CrearPermutaAdminDto = z.infer<typeof crearPermutaAdminSchema>;
+export type EditarPermutaAdminDto = z.infer<typeof editarPermutaAdminSchema>;
+export type CrearPlanPagoAdminDto = z.infer<typeof crearPlanPagoAdminSchema>;
+export type EditarPlanPagoAdminDto = z.infer<typeof editarPlanPagoAdminSchema>;

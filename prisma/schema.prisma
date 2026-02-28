@@ -19,6 +19,7 @@ model Sucursal {
 model Usuario {
   id            String    @id @default(cuid())
   correo        String    @unique
+  usuario       String    @unique
   contrasena    String
   nombre        String
   rol           String    @default("VENDEDOR") // ADMIN | VENDEDOR
@@ -38,9 +39,41 @@ model Pedido {
   cotizacionDolar    Decimal  @db.Decimal(10, 2)
   sku                String
   estado             String   @default("PENDIENTE") // PENDIENTE | ENVIADO_A_CAJA | COMPLETADO
+  observacion        String?
+  metodoPago         String   @default("EFECTIVO") // EFECTIVO | TRANSFERENCIA | TARJETA
+  permutaModelo      String?
+  permutaBateria     Int?
+  permutaValorUsd    Decimal? @db.Decimal(10, 2)
   creadoEn           DateTime @default(now())
   actualizadoEn      DateTime @updatedAt
 
   vendedorId String
   vendedor   Usuario @relation(fields: [vendedorId], references: [id])
+
+  planPagoId String?
+  planPago   PlanPago? @relation(fields: [planPagoId], references: [id])
+}
+
+model CelularPermuta {
+  id            String   @id @default(cuid())
+  nombre        String
+  modelo        String
+  bateriaMin    Int
+  bateriaMax    Int
+  precioUsd     Decimal  @db.Decimal(10, 2)
+  activo        Boolean  @default(true)
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+}
+
+model PlanPago {
+  id            String   @id @default(cuid())
+  marca         String
+  cuotas        Int
+  interesPct    Decimal  @db.Decimal(5, 2)
+  ivaPct        Decimal  @db.Decimal(5, 2)
+  activo        Boolean  @default(true)
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+  pedidos       Pedido[]
 }

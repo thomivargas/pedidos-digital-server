@@ -9,6 +9,8 @@ import { authLimiter, apiLimiter } from './middlewares/rate-limit.middleware';
 import authRoutes from './modules/auth/auth.routes';
 import pedidosRoutes from './modules/pedidos/pedidos.routes';
 import adminRoutes from './modules/admin/admin.routes';
+import permutasRoutes from './modules/permutas/permutas.routes';
+import planesPagoRoutes from './modules/planes-pago/planes-pago.routes';
 
 const app = express();
 
@@ -46,6 +48,8 @@ const API_PREFIX = '/api';
 app.use(`${API_PREFIX}/auth`, authLimiter, authRoutes);
 app.use(`${API_PREFIX}/pedidos`, pedidosRoutes);
 app.use(`${API_PREFIX}/admin`, adminRoutes);
+app.use(`${API_PREFIX}/permutas`, permutasRoutes);
+app.use(`${API_PREFIX}/planes-pago`, planesPagoRoutes);
 
 // ─── 404 handler ─────────────────────────────────────────────────────────────
 app.use((_req, res) => {

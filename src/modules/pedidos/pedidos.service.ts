@@ -9,8 +9,34 @@ import { enviarAGoogleForms } from '../../utils/googleForms';
 import type { CrearPedidoDto } from './pedidos.schema';
 
 export async function crearPedido(dto: CrearPedidoDto, vendedorId: string) {
+  const {
+    nombreProducto,
+    precio,
+    cotizacionDolar,
+    sku,
+    observacion,
+    metodoPago,
+    planPagoId,
+    permutaModelo,
+    permutaBateria,
+    permutaValorUsd,
+  } = dto;
+
   return prisma.pedido.create({
-    data: { ...dto, vendedorId },
+    data: {
+      nombreProducto,
+      precio,
+      cotizacionDolar,
+      sku,
+      observacion: observacion || null,
+      metodoPago,
+      planPagoId: planPagoId || null,
+      permutaModelo: permutaModelo || null,
+      permutaBateria: permutaBateria ?? null,
+      permutaValorUsd: permutaValorUsd ?? null,
+      vendedorId,
+    },
+    include: { planPago: true },
   });
 }
 
@@ -23,6 +49,7 @@ export async function listarMisPedidos(vendedorId: string, params: PaginationPar
       skip,
       take,
       orderBy: { creadoEn: 'desc' },
+      include: { planPago: true },
     }),
     prisma.pedido.count({ where: { vendedorId } }),
   ]);
