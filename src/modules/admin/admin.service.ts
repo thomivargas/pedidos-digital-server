@@ -6,7 +6,17 @@ import {
   buildPaginatedResult,
   type PaginationParams,
 } from '../../utils/pagination';
-import type { AdminPedidosQuery, AdminVendedoresQuery, CrearUsuarioDto, CrearSucursalDto, AsignarVendedoresDto } from './admin.schema';
+import type {
+  AdminPedidosQuery,
+  AdminVendedoresQuery,
+  CrearUsuarioDto,
+  CrearSucursalDto,
+  AsignarVendedoresDto,
+  CrearPermutaAdminDto,
+  EditarPermutaAdminDto,
+  CrearPlanPagoAdminDto,
+  EditarPlanPagoAdminDto,
+} from './admin.schema';
 
 export async function listarTodosPedidos(params: AdminPedidosQuery) {
   const { skip, take } = getPaginationArgs(params);
@@ -24,6 +34,7 @@ export async function listarTodosPedidos(params: AdminPedidosQuery) {
       orderBy: { creadoEn: 'desc' },
       include: {
         vendedor: { select: { id: true, nombre: true, correo: true } },
+        planPago: true,
       },
     }),
     prisma.pedido.count({ where }),
@@ -148,4 +159,74 @@ export async function completarPedido(pedidoId: string) {
     where: { id: pedidoId },
     data: { estado: 'COMPLETADO' },
   });
+}
+
+// ─── Permutas (catálogo) ──────────────────────────────────────────────────
+
+export async function listarPermutas(params: PaginationParams) {
+  const { skip, take } = getPaginationArgs(params);
+  const where = { activo: true };
+
+  const [data, total] = await Promise.all([
+    prisma.celularPermuta.findMany({
+      where,
+      skip,
+      take,
+      orderBy: [{ nombre: 'asc' }, { bateriaMin: 'asc' }],
+    }),
+    prisma.celularPermuta.count({ where }),
+  ]);
+
+  return buildPaginatedResult(data, total, params);
+}
+
+export async function crearPermuta(dto: CrearPermutaAdminDto) {
+  return prisma.celularPermuta.create({ data: dto });
+}
+
+export async function editarPermuta(id: string, dto: EditarPermutaAdminDto) {
+  const existe = await prisma.celularPermuta.findUnique({ where: { id } });
+  if (!existe) throw new NotFoundError('Permuta no encontrada');
+  return prisma.celularPermuta.update({ where: { id }, data: dto });
+}
+
+export async function desactivarPermuta(id: string) {
+  const existe = await prisma.celularPermuta.findUnique({ where: { id } });
+  if (!existe) throw new NotFoundError('Permuta no encontrada');
+  return prisma.celularPermuta.update({ where: { id }, data: { activo: false } });
+}
+
+// ─── Planes de Pago ───────────────────────────────────────────────────────
+
+export async function listarPlanesPago(params: PaginationParams) {
+  const { skip, take } = getPaginationArgs(params);
+  const where = { activo: true };
+
+  const [data, total] = await Promise.all([
+    prisma.planPago.findMany({
+      where,
+      skip,
+      take,
+      orderBy: [{ marca: 'asc' }, { cuotas: 'asc' }],
+    }),
+    prisma.planPago.count({ where }),
+  ]);
+
+  return buildPaginatedResult(data, total, params);
+}
+
+export async function crearPlanPago(dto: CrearPlanPagoAdminDto) {
+  return prisma.planPago.create({ data: dto });
+}
+
+export async function editarPlanPago(id: string, dto: EditarPlanPagoAdminDto) {
+  const existe = await prisma.planPago.findUnique({ where: { id } });
+  if (!existe) throw new NotFoundError('Plan de pago no encontrado');
+  return prisma.planPago.update({ where: { id }, data: dto });
+}
+
+export async function desactivarPlanPago(id: string) {
+  const existe = await prisma.planPago.findUnique({ where: { id } });
+  if (!existe) throw new NotFoundError('Plan de pago no encontrado');
+  return prisma.planPago.update({ where: { id }, data: { activo: false } });
 }
