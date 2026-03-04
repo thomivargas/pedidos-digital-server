@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { paginationSchema } from '../../utils/pagination';
+import { sanitizeHtml } from '../../utils/sanitize';
 
 const EstadoPedido = z.enum(['PENDIENTE', 'ENVIADO_A_CAJA', 'COMPLETADO']);
 const Rol = z.enum(['ADMIN', 'VENDEDOR']);
@@ -16,16 +17,16 @@ export const adminVendedoresQuerySchema = paginationSchema.extend({
 export type AdminVendedoresQuery = z.infer<typeof adminVendedoresQuerySchema>;
 
 export const crearUsuarioSchema = z.object({
-  nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  usuario: z.string().min(2, 'El usuario debe tener al menos 2 caracteres'),
+  nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres').transform(sanitizeHtml),
+  usuario: z.string().min(2, 'El usuario debe tener al menos 2 caracteres').transform(sanitizeHtml),
   correo: z.string().email('Correo inválido'),
   contrasena: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
   rol: Rol.default('VENDEDOR'),
 });
 
 export const crearSucursalSchema = z.object({
-  nombre: z.string().min(1, 'El nombre es requerido'),
-  direccion: z.string().optional(),
+  nombre: z.string().min(1, 'El nombre es requerido').transform(sanitizeHtml),
+  direccion: z.string().transform(sanitizeHtml).optional(),
 });
 
 export const asignarVendedoresSchema = z.object({
@@ -33,8 +34,8 @@ export const asignarVendedoresSchema = z.object({
 });
 
 export const crearPermutaAdminSchema = z.object({
-  nombre: z.string().min(1, 'Nombre requerido'),
-  modelo: z.string().min(1, 'Modelo requerido'),
+  nombre: z.string().min(1, 'Nombre requerido').transform(sanitizeHtml),
+  modelo: z.string().min(1, 'Modelo requerido').transform(sanitizeHtml),
   bateriaMin: z.number().int().min(0).max(100),
   bateriaMax: z.number().int().min(0).max(100),
   precioUsd: z.number().positive('El precio debe ser mayor a 0'),
@@ -43,7 +44,7 @@ export const crearPermutaAdminSchema = z.object({
 export const editarPermutaAdminSchema = crearPermutaAdminSchema.partial();
 
 export const crearPlanPagoAdminSchema = z.object({
-  marca: z.string().min(1, 'Marca requerida'),
+  marca: z.string().min(1, 'Marca requerida').transform(sanitizeHtml),
   cuotas: z.number().int().positive('Las cuotas deben ser mayor a 0'),
   interesPct: z.number().min(0, 'El interés no puede ser negativo'),
   ivaPct: z.number().min(0, 'El IVA no puede ser negativo'),

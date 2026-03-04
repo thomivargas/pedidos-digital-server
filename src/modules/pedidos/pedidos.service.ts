@@ -6,6 +6,7 @@ import {
   type PaginationParams,
 } from '../../utils/pagination';
 import { enviarAGoogleForms } from '../../utils/googleForms';
+import { registrarCambioEstado } from '../../utils/audit';
 import type { CrearPedidoDto } from './pedidos.schema';
 
 export async function crearPedido(dto: CrearPedidoDto, vendedorId: string) {
@@ -72,6 +73,13 @@ export async function enviarACaja(pedidoId: string, vendedorId: string) {
   const pedidoActualizado = await prisma.pedido.update({
     where: { id: pedidoId },
     data: { estado: 'ENVIADO_A_CAJA' },
+  });
+
+  await registrarCambioEstado({
+    entidadId: pedidoId,
+    antes: 'PENDIENTE',
+    despues: 'ENVIADO_A_CAJA',
+    usuarioId: vendedorId,
   });
 
   const googleForms = await enviarAGoogleForms({

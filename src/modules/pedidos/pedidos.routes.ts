@@ -3,6 +3,7 @@ import { authenticate } from '../../middlewares/auth.middleware';
 import { requireRole } from '../../middlewares/rol.middleware';
 import { validate } from '../../middlewares/validate.middleware';
 import { paginationSchema } from '../../utils/pagination';
+import { idParamSchema } from '../../utils/params';
 import { crearPedidoSchema } from './pedidos.schema';
 import {
   crearPedidoHandler,
@@ -17,6 +18,6 @@ router.use(authenticate, requireRole('VENDEDOR'));
 
 router.post('/', validate(crearPedidoSchema), crearPedidoHandler);
 router.get('/', validate(paginationSchema, 'query'), listarPedidosHandler);
-router.patch('/:id/enviar-caja', enviarACajaHandler);
+router.patch('/:id/enviar-caja', validate(idParamSchema, 'params'), enviarACajaHandler);
 
 export default router;

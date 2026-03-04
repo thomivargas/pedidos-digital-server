@@ -1,5 +1,6 @@
 import { prisma } from '../../config/database';
 import { NotFoundError, BadRequestError, ConflictError } from '../../middlewares/errors';
+import { registrarCambioEstado } from '../../utils/audit';
 import { hashPassword } from '../../utils/hash';
 import {
   getPaginationArgs,
@@ -155,10 +156,18 @@ export async function completarPedido(pedidoId: string) {
       `Solo se pueden completar pedidos en estado ENVIADO_A_CAJA. Estado actual: ${pedido.estado}`,
     );
 
-  return prisma.pedido.update({
+  const pedidoActualizado = await prisma.pedido.update({
     where: { id: pedidoId },
     data: { estado: 'COMPLETADO' },
   });
+
+  await registrarCambioEstado({
+    entidadId: pedidoId,
+    antes: 'ENVIADO_A_CAJA',
+    despues: 'COMPLETADO',
+  });
+
+  return pedidoActualizado;
 }
 
 // ─── Permutas (catálogo) ──────────────────────────────────────────────────

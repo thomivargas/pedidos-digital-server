@@ -1,30 +1,28 @@
 import { env } from './config/env';
 import { prisma } from './config/database';
+import { logger } from './config/logger';
 import app from './app';
 
 async function bootstrap() {
-  // Verificar conexión a la base de datos antes de levantar el servidor
   try {
     await prisma.$connect();
-    console.log('✅ Conectado a la base de datos');
+    logger.info('Conectado a la base de datos');
   } catch (err) {
-    console.error('❌ No se pudo conectar a la base de datos:', err);
+    logger.fatal(err, 'No se pudo conectar a la base de datos');
     process.exit(1);
   }
 
   const host = '0.0.0.0';
   const server = app.listen(env.PORT, host, () => {
-    console.log(`🚀 Servidor corriendo en http://${host}:${env.PORT}`);
-    console.log(`📋 Ambiente: ${env.NODE_ENV}`);
-    console.log(`🔍 Health check: http://${host}:${env.PORT}/health`);
+    logger.info({ host, port: env.PORT, env: env.NODE_ENV }, 'Servidor iniciado');
   });
 
   // ─── Graceful shutdown ──────────────────────────────────────────────────────
   const shutdown = async (signal: string) => {
-    console.log(`\n⚠️  ${signal} recibido — cerrando servidor...`);
+    logger.info({ signal }, 'Cerrando servidor...');
     server.close(async () => {
       await prisma.$disconnect();
-      console.log('👋 Servidor cerrado correctamente');
+      logger.info('Servidor cerrado correctamente');
       process.exit(0);
     });
   };
@@ -32,14 +30,13 @@ async function bootstrap() {
   process.on('SIGTERM', () => shutdown('SIGTERM'));
   process.on('SIGINT', () => shutdown('SIGINT'));
 
-  // Capturar errores no manejados para evitar caídas silenciosas
   process.on('uncaughtException', (err) => {
-    console.error('💥 uncaughtException:', err);
+    logger.fatal(err, 'uncaughtException');
     process.exit(1);
   });
 
   process.on('unhandledRejection', (reason) => {
-    console.error('💥 unhandledRejection:', reason);
+    logger.fatal({ reason }, 'unhandledRejection');
     process.exit(1);
   });
 }

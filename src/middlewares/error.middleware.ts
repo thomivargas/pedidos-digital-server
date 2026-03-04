@@ -3,6 +3,7 @@ import { ZodError } from 'zod';
 import { Prisma } from '@prisma/client';
 import { AppError } from './errors';
 import { env } from '../config/env';
+import { logger } from '../config/logger';
 
 /**
  * Middleware global de manejo de errores.
@@ -57,7 +58,7 @@ export function errorHandler(
   }
 
   // ─── Errores no controlados ───────────────────────────────────────────────
-  console.error('💥 Error no controlado:', err);
+  logger.error(err, 'Error no controlado');
 
   res.status(500).json({
     status: 'error',

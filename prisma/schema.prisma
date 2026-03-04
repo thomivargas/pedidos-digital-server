@@ -52,6 +52,10 @@ model Pedido {
 
   planPagoId String?
   planPago   PlanPago? @relation(fields: [planPagoId], references: [id])
+
+  @@index([vendedorId])
+  @@index([estado])
+  @@index([creadoEn])
 }
 
 model CelularPermuta {
@@ -64,6 +68,20 @@ model CelularPermuta {
   activo        Boolean  @default(true)
   creadoEn      DateTime @default(now())
   actualizadoEn DateTime @updatedAt
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  entidad    String
+  entidadId  String
+  accion     String
+  antes      String?
+  despues    String
+  usuarioId  String?
+  creadoEn   DateTime @default(now())
+
+  @@index([entidadId])
+  @@index([creadoEn])
 }
 
 model PlanPago {

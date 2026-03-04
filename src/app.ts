@@ -1,9 +1,11 @@
 import express from 'express';
+import compression from 'compression';
 import cors from 'cors';
 import helmet from 'helmet';
-import morgan from 'morgan';
+import pinoHttp from 'pino-http';
 
 import { env } from './config/env';
+import { logger } from './config/logger';
 import { errorHandler } from './middlewares/error.middleware';
 import { authLimiter, apiLimiter } from './middlewares/rate-limit.middleware';
 import authRoutes from './modules/auth/auth.routes';
@@ -15,6 +17,7 @@ import planesPagoRoutes from './modules/planes-pago/planes-pago.routes';
 const app = express();
 
 // ─── Middlewares globales ─────────────────────────────────────────────────────
+app.use(compression());
 app.use(helmet());
 
 // CORS — soporta múltiples orígenes separados por coma en CORS_ORIGIN
@@ -32,10 +35,8 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 // Rate limiting global
 app.use(apiLimiter);
 
-// Logging solo en desarrollo
-if (env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
-}
+// HTTP request logging (todos los ambientes)
+app.use(pinoHttp({ logger }));
 
 // ─── Health check ─────────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => {
